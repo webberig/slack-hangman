@@ -3,6 +3,7 @@ import {resolve} from "path";
 import {Subject} from "rxjs";
 import {createGame} from "../game/createGame";
 import {getGuessedWordParts} from "../game/utils";
+import {hangmanAscii} from "../game/hangmanAscii";
 const prompts = require('prompts');
 
 const words = readFileSync(resolve(__dirname, "words.txt")).toString().split("\n");
@@ -14,9 +15,10 @@ game$.subscribe(state => {
   const wordParts = getGuessedWordParts(state.word, state.guessedCharacters)
     .map(char => char || "_");
 
-  console.log("=========================");
+  console.log("");
   console.log(wordParts.join(" "));
   console.log("=========================");
+  console.log(hangmanAscii[state.wrongGuesses]);
   switch (state.status) {
     case "Won":
       console.log(`Wrong answers: ${state.wrongGuesses}/6`);
@@ -37,6 +39,8 @@ game$.subscribe(state => {
     name: 'guess',
     message: 'Take a guess?',
   });
-  guesses$.next(response.guess);
-  askGuess();
+  if (response.guess) {
+    guesses$.next(response.guess);
+    askGuess();
+  }
 })();
