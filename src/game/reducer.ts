@@ -1,5 +1,6 @@
 import {GameState, MAX_FAILED_GUESSES} from "./types";
 import {ActionType, GameStartAction, GuessAction} from "./actions";
+import {isWordGuessed} from "./utils";
 
 function addFailedAttempt (state: GameState): GameState {
   const wrongGuesses = ++state.wrongGuesses;
@@ -8,10 +9,6 @@ function addFailedAttempt (state: GameState): GameState {
     wrongGuesses,
     status: wrongGuesses === MAX_FAILED_GUESSES ? "Lost" : "Busy"
   }
-}
-
-function isWordGuessed (word: string, guesses: string[]) {
-  return !word.split("").find(char => !guesses.includes(char))
 }
 
 export function reducer (state: GameState, action: GuessAction | GameStartAction): GameState {
