@@ -22,24 +22,7 @@ describe("game/reducer", () => {
     });
 
   });
-  it("should return same state when unknown action is dispatched", () => {
-    const state = reducer({
-        word: "hangman",
-        wrongGuesses: 0,
-        guessedCharacters: [],
-        status: "Busy",
-      },
-      {
-        type: ActionType.LOST,
-      });
-    expect(state).toEqual<GameState>({
-      word: "hangman",
-      wrongGuesses: 0,
-      guessedCharacters: [],
-      status: "Busy",
-    });
 
-  });
   describe("start", () => {
     it("should have a proper initial state", () => {
       const state = reducer(undefined, {

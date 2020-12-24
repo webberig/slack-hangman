@@ -1,7 +1,5 @@
 export enum ActionType {
   GUESS= "Guess",
-  WON="WON",
-  LOST="LOST",
   START="START",
 }
 
@@ -10,17 +8,7 @@ export interface GuessAction {
   guess: string;
 }
 
-export interface GameWon {
-  type: ActionType.WON
-}
-
-export interface GameLost {
-  type: ActionType.LOST
-}
-
-export interface GameStart {
+export interface GameStartAction {
   type: ActionType.START;
   word: string;
 }
-
-export type Action = GuessAction | GameWon | GameLost | GameStart;

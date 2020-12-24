@@ -1,31 +1,33 @@
 import {Subject} from "rxjs";
-import {createGame} from "./Game";
-import {Action, ActionType, GuessAction} from "./actions";
+import {createGame} from "./createGame";
+import {ActionType, GuessAction} from "./actions";
 import {TestScheduler} from "rxjs/testing";
 import {filter, skipWhile, tap} from "rxjs/internal/operators";
+import {ColdObservable} from "rxjs/internal/testing/ColdObservable";
 
 const testScheduler = new TestScheduler((actual, expected) => {
   expect(actual).toEqual(expected);
 });
 
-function mapGuessesToMarbleValues(guesses: string[]): {[key: string]: GuessAction} {
+function createGuesses(guesses: string[]): ColdObservable<string> {
+  //testScheduler.createColdObservable()
   let charIndex = 97;
-  const values: {[key: string]: GuessAction} = {};
+  let marbles = "";
+  const values: {[key: string]: string} = {};
   guesses.forEach(guess => {
-    values[String.fromCharCode(charIndex++)] = {
-      type: ActionType.GUESS,
-      guess,
-    }
+    const char = String.fromCharCode(charIndex++)
+    marbles += char;
+    values[char] = guess;
   });
-  return values;
+  return testScheduler.createColdObservable(marbles, values);
 }
 describe("Game", () => {
-  let actions$: Subject<Action>;
+  let guesses$: Subject<string>;
   beforeEach(function () {
-    actions$ = new Subject<Action>();
+    guesses$ = new Subject<string>();
   });
   it("should have a proper initial state", done => {
-    const game$ = createGame(actions$.asObservable(), "protagonist");
+    const game$ = createGame(guesses$.asObservable(), "protagonist");
     game$.subscribe(state => {
       expect(state).toEqual({
         status: "Busy",
@@ -37,9 +39,9 @@ describe("Game", () => {
     })
   });
   it("should win the game when last letter is guessed", () => {
-    testScheduler.run(({ cold, hot, expectObservable, expectSubscriptions, flush }) => {
-      const actions$ = cold("abcdef", mapGuessesToMarbleValues(["h", "a", "m", "n", "x", "g"]));
-      const game$ = createGame(actions$, "hangman").pipe(
+    testScheduler.run(({ expectObservable }) => {
+      const guesses$ = createGuesses(["h", "a", "m", "n", "x", "g"]);
+      const game$ = createGame(guesses$, "hangman").pipe(
         filter(state => state.status !== "Busy")
       );
       expectObservable(game$).toBe("-----(d|)", {
@@ -53,9 +55,9 @@ describe("Game", () => {
     });
   });
   it("should win the game when word is guessed entirely", () => {
-    testScheduler.run(({ cold, hot, expectObservable, expectSubscriptions, flush }) => {
-      const actions$ = cold("abcdef", mapGuessesToMarbleValues(["h", "a", "hangman", "protagonist"]));
-      const game$ = createGame(actions$, "protagonist").pipe(
+    testScheduler.run(({ expectObservable }) => {
+      const guesses$ = createGuesses(["h", "a", "hangman", "protagonist"]);
+      const game$ = createGame(guesses$, "protagonist").pipe(
         filter(state => state.status !== "Busy")
       );
       expectObservable(game$).toBe("--------(d|)", {
@@ -69,9 +71,9 @@ describe("Game", () => {
     });
   });
   it("should lose the game after maximum amount of guesses", () => {
-    testScheduler.run(({ cold, hot, expectObservable, expectSubscriptions, flush }) => {
-      const actions$ = cold("abcdef", mapGuessesToMarbleValues(["f", "g", "h", "i", "j", "k"]));
-      const game$ = createGame(actions$, "cursedmarbles").pipe(
+    testScheduler.run(({ expectObservable }) => {
+      const guesses$ = createGuesses(["f", "g", "h", "i", "j", "k"]);
+      const game$ = createGame(guesses$, "cursedmarbles").pipe(
         filter(state => state.status !== "Busy")
       );
       expectObservable(game$).toBe("-------------(d|)", {
