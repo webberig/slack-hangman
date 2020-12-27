@@ -23,14 +23,14 @@ export function reducer (state: GameState, action: GuessAction | GameStartAction
       guessedCharacters: [],
     };
   }
-  const {guess} = action;
-  if (guess === state.word) {
+  const guess = action.guess.toLowerCase();
+  if (guess === state.word.toLowerCase()) {
     return {
       ...state,
       status: "Won",
     }
   }
-  if (guess.length > 1 || !state.word.includes(guess)) {
+  if (guess.length > 1 || !state.word.toLowerCase().includes(guess)) {
     return addFailedAttempt(state);
   }
   if (state.guessedCharacters.includes(guess)) {
