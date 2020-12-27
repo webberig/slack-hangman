@@ -9,7 +9,7 @@
   "author": "Mathieu Maes",
   "scripts": {
     "start": "nodemon",
-    "start:prod": "ts-node src/slack/index.ts",
+    "start:prod": "node dist/slack/index.js",
     "build": "tsc",
     "test": "jest",
     "play": "ts-node src/cli"
